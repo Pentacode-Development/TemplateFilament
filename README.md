@@ -1,4 +1,11 @@
-# Djarum Coklat Revamp 2024
+# Template Filament Admin Panel
+
+## Includes
+1. Filament
+1. Filament Shield
+1. Filament Media Library Pro
+1. Filament Translatable
+1. Filament Setting Plugin
 
 ## Server Requirements
 1. PHP 8.x
