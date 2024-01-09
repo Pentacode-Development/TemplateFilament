@@ -1,0 +1,8 @@
+{
+    "http-basic": {
+        "filament-media-library-pro.composer.sh": {
+            "username": "example@example.com",
+            "password": "pass:appdomain"
+        }
+    }
+}

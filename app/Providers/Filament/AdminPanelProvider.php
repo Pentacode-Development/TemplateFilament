@@ -1,0 +1,124 @@
+<?php
+
+namespace App\Providers\Filament;
+
+use App\Enums\AuthGuard;
+use App\Filament\Pages\Auth\EditProfile;
+use App\Filament\Pages\Auth\EmailVerification\EmailVerificationPrompt;
+use App\Filament\Pages\Auth\Login;
+use App\Filament\Pages\Auth\PasswordReset\RequestPasswordReset;
+use App\Filament\Pages\Auth\Register;
+use App\Filament\Pages\Dashboard;
+use App\Filament\Pages\Media\MediaLibrary;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use Filament\Enums\ThemeMode;
+use Filament\FontProviders\GoogleFontProvider;
+use Filament\Http\Middleware\Authenticate;
+use Filament\Http\Middleware\DisableBladeIconComponents;
+use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
+use Filament\Pages;
+use Filament\Panel;
+use Filament\PanelProvider;
+use Filament\Support\Colors\Color;
+use Filament\Widgets;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Session\Middleware\AuthenticateSession;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
+use RalphJSmit\Filament\MediaLibrary\FilamentMediaLibrary;
+use Filament\SpatieLaravelTranslatablePlugin;
+
+class AdminPanelProvider extends PanelProvider
+{
+    public function panel(Panel $panel): Panel
+    {
+        return $panel
+            ->default()
+            ->id('admin')
+            ->path('admin')
+            ->brandName('Panel')
+            ->brandLogo(fn () => asset('pentacode.png'))
+            ->brandLogoHeight('2rem')
+            ->favicon(asset('pentacode-favicon-32x32.png'))
+            ->viteTheme('resources/css/filament/admin/theme.css')
+            ->login(Login::class)
+            ->profile(EditProfile::class)
+            // ->passwordReset(RequestPasswordReset::class)
+            // ->registration(Register::class)
+            ->authGuard(AuthGuard::ADMIN)
+            ->requiresEmailVerification(true)
+            ->emailVerification(EmailVerificationPrompt::class)
+            ->font('Poppins', provider: GoogleFontProvider::class)
+            ->darkMode(true)
+            ->defaultThemeMode(ThemeMode::Dark)
+            ->colors([
+                // example: #6366f1, rgb(99, 102, 241)
+                'danger' => Color::Rose,
+                'gray' => Color::Gray,
+                'info' => Color::Blue,
+                'success' => Color::Emerald,
+                'warning' => Color::Orange,
+                'primary' => [
+                    50 => '238, 242, 255',
+                    100 => '224, 231, 255',
+                    200 => '199, 210, 254',
+                    300 => '165, 180, 252',
+                    400 => '129, 140, 248',
+                    500 => '99, 102, 241',
+                    600 => '79, 70, 229',
+                    700 => '67, 56, 202',
+                    800 => '55, 48, 163',
+                    900 => '49, 46, 129',
+                    950 => '30, 27, 75',
+                ],
+            ])
+            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
+            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->pages([
+                Dashboard::class,
+            ])
+            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            ->widgets([
+                // Widgets\AccountWidget::class,
+                // Widgets\FilamentInfoWidget::class,
+            ])
+            ->navigationGroups([
+                trans('admin.navigations.groups.media'),
+                trans('admin.navigations.groups.auth'),
+                trans('admin.navigations.groups.shield')
+            ])
+            ->plugins([
+                FilamentMediaLibrary::make()
+                    ->mediaPickerModalWidth('7xl')
+                    ->unstoredUploadsWarning()
+                    // ->showUploadBoxByDefault()
+                    ->acceptImage()
+                    // ->acceptVideo()
+                    // ->acceptPdf()
+                    ->registerPages([
+                        MediaLibrary::class
+                    ]),
+                SpatieLaravelTranslatablePlugin::make()->defaultLocales(['en', 'id']),
+                FilamentShieldPlugin::make(),
+            ])
+            ->middleware([
+                EncryptCookies::class,
+                AddQueuedCookiesToResponse::class,
+                StartSession::class,
+                AuthenticateSession::class,
+                ShareErrorsFromSession::class,
+                VerifyCsrfToken::class,
+                SubstituteBindings::class,
+                DisableBladeIconComponents::class,
+                DispatchServingFilamentEvent::class,
+            ])
+            ->emailVerifiedMiddlewareName('verified')
+            ->authMiddleware([
+                Authenticate::class,
+            ]);
+    }
+}
